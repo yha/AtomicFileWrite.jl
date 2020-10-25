@@ -5,7 +5,7 @@ export atomic_write
 function atomic_write(f, path; backup=nothing, overwrite_backup=false)
     mktemp() do temp_path, temp_io
         f(temp_io)
-        isnothing(backup) || cp(path, backup; force=overwrite_backup)
+        backup == nothing || cp(path, backup; force=overwrite_backup)
         close(temp_io)
         _replace(temp_path, path)
     end
