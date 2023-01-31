@@ -5,9 +5,9 @@ mktempdir() do dir; cd(dir) do
     fname = "1"
     e = ArgumentError("msg")
 
-    @test atomic_write(io->print(io,"write"), fname) == nothing
+    @test atomic_write(io->print(io,"write"), fname) === nothing
     @test read(fname, String) == "write"
-    @test atomic_write(io->print(io,"overwrite"), fname) == nothing
+    @test atomic_write(io->print(io,"overwrite"), fname) === nothing
     @test read(fname, String) == "overwrite"
 
     @test_throws e atomic_write(fname) do io
@@ -27,8 +27,12 @@ mktempdir() do dir; cd(dir) do
         @test read(fname, String) == "overwrite"
     end
 
+    dirname = "dir"
+    mkdir(dirname)
+    @test_throws Exception atomic_write(io->print(io,"write"), dirname)
+
     backup = "$fname.bck"
-    @test atomic_write(io->print(io,"overwrite 2"), fname; backup=backup) == nothing
+    @test atomic_write(io->print(io,"overwrite 2"), fname; backup=backup) === nothing
     @test read(fname, String) == "overwrite 2"
     @test read(backup, String) == "overwrite"
 
@@ -37,7 +41,7 @@ mktempdir() do dir; cd(dir) do
     @test read(backup, String) == "overwrite"
 
     @test atomic_write(io->print(io,"overwrite backup"), fname;
-                        backup=backup, overwrite_backup=true) == nothing
+                        backup=backup, overwrite_backup=true) === nothing
     @test read(fname, String) == "overwrite backup"
     @test read(backup, String) == "overwrite 2"
 end; end
