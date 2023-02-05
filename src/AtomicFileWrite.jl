@@ -2,20 +2,20 @@ module AtomicFileWrite
 
 export atomic_write
 
-function atomic_write(f, path; backup=nothing, overwrite_backup=false)
-    isdir(path) && error("Cannot `atomic_write` to `path`: is a directory")
-    # The temp file is created in the same location as `path`,
+function atomic_write(f, dst; backup=nothing, overwrite_backup=false)
+    isdir(dst) && error("Cannot `atomic_write` to $dst: is a directory")
+    # The temp file is created in the same location as `dst`,
     # to ensure it's on the same device and can atomically replace 
-    # the target at `path` using `jl_fs_rename`
-    tmp_path = dirname(path)
+    # the target at `std` using `jl_fs_rename`
+    dst_dir = dirname(dst)
     # On Windows, `mktemp("")` creates the temp file at "/" rather than "."
-    isempty(tmp_path) && (tmp_path = ".")
+    isempty(dst_dir) && (dst_dir = ".")
 
-    mktemp(tmp_path) do temp_path, temp_io
+    mktemp(dst_dir) do temp_path, temp_io
         f(temp_io)
-        backup === nothing || cp(path, backup; force=overwrite_backup)
+        backup === nothing || cp(dst, backup; force=overwrite_backup)
         close(temp_io)
-        _replace(temp_path, path)
+        _replace(temp_path, dst)
     end
 end
 
